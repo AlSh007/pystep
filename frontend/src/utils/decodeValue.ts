@@ -1,6 +1,6 @@
-import type { EncodedValue, Step, RenderValue, HeapObject, HeapItem } from "../types/trace"
+import type { EncodedValue, EncodedCompound, Step, RenderValue, HeapObject, HeapItem } from "../types/trace"
 
-function isCompound(value: EncodedValue): value is [string, number, ...unknown[]] {
+function isCompound(value: EncodedValue): value is EncodedCompound {
   return Array.isArray(value)
 }
 
@@ -12,22 +12,40 @@ function formatPrimitive(value: null | boolean | number | string): string {
   return String(value)
 }
 
+// The backend encoder (backend/tracer/encoder.py) puts the numeric small-id
+// at index 1 for most compound tags (["LIST", id, ...items]), but INSTANCE
+// and FUNCTION carry an extra string field (className / name) before the id:
+//   ["INSTANCE", className, id, [attr, val], ...]
+//   ["FUNCTION", name, id]
+// This helper centralizes that distinction so no call site has to assume
+// index 1 is always the id.
+function getCompoundId(value: EncodedCompound): number {
+  const tag = value[0]
+  if (tag === "INSTANCE" || tag === "FUNCTION") {
+    return value[2] as number
+  }
+  return value[1] as number
+}
+
 export function toRenderValue(value: EncodedValue): RenderValue {
   if (!isCompound(value)) {
     return { kind: "primitive", display: formatPrimitive(value) }
   }
-  const [tag, id] = value
+  const tag = value[0]
+  const id = getCompoundId(value)
   if (tag === "CIRCULAR_REF") {
-    return { kind: "circular", id: id as number }
+    return { kind: "circular", id }
   }
-  return { kind: "ref", id: id as number }
+  return { kind: "ref", id }
 }
 
-function toHeapObject(value: [string, number, ...unknown[]]): HeapObject {
-  const [tag, id, ...rest] = value
+function toHeapObject(value: EncodedCompound): HeapObject {
+  const tag = value[0]
+  const id = getCompoundId(value)
 
   if (tag === "LIST" || tag === "TUPLE" || tag === "SET") {
-    const items: HeapItem[] = (rest as EncodedValue[]).map((v, i) => ({
+    const rest = value.slice(2) as EncodedValue[]
+    const items: HeapItem[] = rest.map((v, i) => ({
       key: String(i),
       value: toRenderValue(v),
     }))
@@ -35,7 +53,8 @@ function toHeapObject(value: [string, number, ...unknown[]]): HeapObject {
   }
 
   if (tag === "DICT") {
-    const items: HeapItem[] = (rest as [EncodedValue, EncodedValue][]).map(([k, v]) => ({
+    const rest = value.slice(2) as [EncodedValue, EncodedValue][]
+    const items: HeapItem[] = rest.map(([k, v]) => ({
       key: formatPrimitive(k as null | boolean | number | string),
       value: toRenderValue(v),
     }))
@@ -43,30 +62,32 @@ function toHeapObject(value: [string, number, ...unknown[]]): HeapObject {
   }
 
   if (tag === "INSTANCE") {
-    const [className, ...attrs] = rest as [string, ...[string, EncodedValue][]]
+    const className = value[1] as string
+    const attrs = value.slice(3) as [string, EncodedValue][]
     const items: HeapItem[] = attrs.map(([k, v]) => ({ key: k, value: toRenderValue(v) }))
     return { id, kind: "INSTANCE", label: className, items }
   }
 
   if (tag === "FUNCTION") {
-    const [name] = rest as [string]
+    const name = value[1] as string
     return { id, kind: "FUNCTION", label: `function ${name}`, items: [] }
   }
 
+  const rest = value.slice(2)
   return { id, kind: "OTHER", label: String(rest[rest.length - 1] ?? tag), items: [] }
 }
 
-function rawChildren(value: [string, number, ...unknown[]]): EncodedValue[] {
-  const [tag, , ...rest] = value
+function rawChildren(value: EncodedCompound): EncodedValue[] {
+  const tag = value[0]
 
   if (tag === "LIST" || tag === "TUPLE" || tag === "SET") {
-    return rest as EncodedValue[]
+    return value.slice(2) as EncodedValue[]
   }
   if (tag === "DICT") {
-    return (rest as [EncodedValue, EncodedValue][]).flat()
+    return (value.slice(2) as [EncodedValue, EncodedValue][]).flat()
   }
   if (tag === "INSTANCE") {
-    const [, ...attrs] = rest as [string, ...[string, EncodedValue][]]
+    const attrs = value.slice(3) as [string, EncodedValue][]
     return attrs.map(([, v]) => v)
   }
   return []
@@ -77,12 +98,13 @@ export function collectHeap(step: Step): Map<number, HeapObject> {
 
   function visit(value: EncodedValue): void {
     if (!isCompound(value)) return
-    const [tag, id] = value
+    const tag = value[0]
     if (tag === "CIRCULAR_REF" || tag === "FUNCTION") return
-    if (heap.has(id as number)) return
+    const id = getCompoundId(value)
+    if (heap.has(id)) return
 
-    heap.set(id as number, toHeapObject(value as [string, number, ...unknown[]]))
-    for (const child of rawChildren(value as [string, number, ...unknown[]])) {
+    heap.set(id, toHeapObject(value))
+    for (const child of rawChildren(value)) {
       visit(child)
     }
   }

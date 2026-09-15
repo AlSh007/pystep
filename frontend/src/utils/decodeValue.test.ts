@@ -18,6 +18,10 @@ describe("toRenderValue", () => {
   it("renders a circular reference distinctly", () => {
     expect(toRenderValue(["CIRCULAR_REF", 3])).toEqual({ kind: "circular", id: 3 })
   })
+
+  it("renders a function reference with its numeric id", () => {
+    expect(toRenderValue(["FUNCTION", "add", 9])).toEqual({ kind: "ref", id: 9 })
+  })
 })
 
 describe("collectHeap", () => {
@@ -64,5 +68,30 @@ describe("collectHeap", () => {
     const heap = collectHeap(step)
 
     expect(heap.size).toBe(1)
+  })
+
+  it("collects an instance with the correct numeric id and class name label", () => {
+    const step = stepWithLocals({ d: ["INSTANCE", "Dog", 5, ["name", "Rex"]] })
+    const heap = collectHeap(step)
+
+    expect(heap.has(5)).toBe(true)
+    expect(heap.get(5)).toEqual({
+      id: 5,
+      kind: "INSTANCE",
+      label: "Dog",
+      items: [{ key: "name", value: { kind: "primitive", display: '"Rex"' } }],
+    })
+  })
+
+  it("does not collapse two distinct instances of the same class", () => {
+    const step = stepWithLocals({
+      a: ["INSTANCE", "Dog", 5, ["name", "Rex"]],
+      b: ["INSTANCE", "Dog", 7, ["name", "Fido"]],
+    })
+    const heap = collectHeap(step)
+
+    expect(heap.size).toBe(2)
+    expect(heap.has(5)).toBe(true)
+    expect(heap.has(7)).toBe(true)
   })
 })
