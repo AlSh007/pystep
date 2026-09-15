@@ -1,0 +1,79 @@
+import { useEffect, useState, type RefObject } from "react"
+
+interface Arrow {
+  id: string
+  x1: number
+  y1: number
+  x2: number
+  y2: number
+}
+
+interface HeapArrowsProps {
+  containerRef: RefObject<HTMLElement | null>
+  redrawKey: unknown
+}
+
+export function HeapArrows({ containerRef, redrawKey }: HeapArrowsProps) {
+  const [arrows, setArrows] = useState<Arrow[]>([])
+
+  useEffect(() => {
+    const container = containerRef.current
+    if (!container) return
+
+    function recompute() {
+      if (!container) return
+      const containerRect = container.getBoundingClientRect()
+      const sources = Array.from(container.querySelectorAll<HTMLElement>("[data-ref-source]"))
+      const next: Arrow[] = []
+
+      sources.forEach((source, i) => {
+        const targetId = source.dataset.refSource
+        const target = container.querySelector<HTMLElement>(`[data-heap-target="${targetId}"]`)
+        if (!target) return
+
+        const sourceRect = source.getBoundingClientRect()
+        const targetRect = target.getBoundingClientRect()
+        next.push({
+          id: `${targetId}-${i}`,
+          x1: sourceRect.right - containerRect.left,
+          y1: sourceRect.top + sourceRect.height / 2 - containerRect.top,
+          x2: targetRect.left - containerRect.left,
+          y2: targetRect.top + targetRect.height / 2 - containerRect.top,
+        })
+      })
+
+      setArrows(next)
+    }
+
+    recompute()
+    const observer = new ResizeObserver(recompute)
+    observer.observe(container)
+    return () => observer.disconnect()
+  }, [containerRef, redrawKey])
+
+  return (
+    <svg
+      className="heap-arrows"
+      aria-hidden="true"
+      style={{
+        position: "absolute",
+        top: 0,
+        left: 0,
+        width: "100%",
+        height: "100%",
+        pointerEvents: "none",
+      }}
+    >
+      {arrows.map((arrow) => (
+        <line
+          key={arrow.id}
+          x1={arrow.x1}
+          y1={arrow.y1}
+          x2={arrow.x2}
+          y2={arrow.y2}
+          className="heap-arrow-line"
+        />
+      ))}
+    </svg>
+  )
+}
