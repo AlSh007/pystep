@@ -99,7 +99,7 @@ export function collectHeap(step: Step): Map<number, HeapObject> {
   function visit(value: EncodedValue): void {
     if (!isCompound(value)) return
     const tag = value[0]
-    if (tag === "CIRCULAR_REF" || tag === "FUNCTION") return
+    if (tag === "CIRCULAR_REF") return
     const id = getCompoundId(value)
     if (heap.has(id)) return
 

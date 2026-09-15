@@ -94,4 +94,17 @@ describe("collectHeap", () => {
     expect(heap.has(5)).toBe(true)
     expect(heap.has(7)).toBe(true)
   })
+
+  it("adds a function reference to the heap map", () => {
+    const step = stepWithLocals({ f: ["FUNCTION", "factorial", 1] })
+    const heap = collectHeap(step)
+
+    expect(heap.size).toBe(1)
+    expect(heap.get(1)).toEqual({
+      id: 1,
+      kind: "FUNCTION",
+      label: "function factorial",
+      items: [],
+    })
+  })
 })
