@@ -154,6 +154,10 @@ body {
   stroke-width: 1.5;
 }
 
+.heap-arrow-head {
+  fill: var(--accent);
+}
+
 @keyframes fadeIn {
   from { opacity: 0; }
   to { opacity: 1; }

@@ -73,6 +73,19 @@ export function HeapArrows({ containerRef, redrawKey }: HeapArrowsProps) {
         pointerEvents: "none",
       }}
     >
+      <defs>
+        <marker
+          id="heap-arrow-head"
+          viewBox="0 0 10 10"
+          refX="9"
+          refY="5"
+          markerWidth="6"
+          markerHeight="6"
+          orient="auto-start-reverse"
+        >
+          <path d="M 0 0 L 10 5 L 0 10 z" className="heap-arrow-head" />
+        </marker>
+      </defs>
       {arrows.map((arrow) => (
         <line
           key={arrow.id}
@@ -81,6 +94,7 @@ export function HeapArrows({ containerRef, redrawKey }: HeapArrowsProps) {
           x2={arrow.x2}
           y2={arrow.y2}
           className="heap-arrow-line"
+          markerEnd="url(#heap-arrow-head)"
         />
       ))}
     </svg>

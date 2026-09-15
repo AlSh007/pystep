@@ -77,4 +77,26 @@ describe("HeapArrows", () => {
     expect(updatedLines[0].getAttribute("x1")).toBe("230")
     expect(updatedLines[0].getAttribute("y1")).toBe("205")
   })
+
+  it("draws each line with an arrowhead pointing at the target", () => {
+    vi.spyOn(HTMLElement.prototype, "getBoundingClientRect").mockImplementation(function (
+      this: HTMLElement,
+    ) {
+      if (this.dataset.refSource) {
+        return { top: 10, left: 10, right: 30, bottom: 20, width: 20, height: 10 } as DOMRect
+      }
+      if (this.dataset.heapTarget) {
+        return { top: 50, left: 100, right: 150, bottom: 70, width: 50, height: 20 } as DOMRect
+      }
+      return { top: 0, left: 0, right: 0, bottom: 0, width: 0, height: 0 } as DOMRect
+    })
+
+    const { container } = render(<Harness />)
+    const marker = container.querySelector("marker")
+    const line = container.querySelector("line")
+
+    expect(marker).not.toBeNull()
+    expect(marker?.id).toBe("heap-arrow-head")
+    expect(line?.getAttribute("marker-end")).toBe(`url(#${marker?.id})`)
+  })
 })
