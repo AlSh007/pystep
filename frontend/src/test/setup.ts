@@ -1,4 +1,15 @@
+import { cleanup } from "@testing-library/react"
+import { afterEach } from "vitest"
 import "@testing-library/jest-dom/vitest"
+
+// This project doesn't set `test.globals: true` in vite.config.ts, so
+// @testing-library/react's own auto-cleanup (which only registers itself
+// when a global `afterEach` exists) never fires. Without this, multiple
+// `render()` calls within one test file leave prior renders' DOM mounted,
+// making `screen.getByText`-style queries ambiguous or wrong across tests.
+afterEach(() => {
+  cleanup()
+})
 
 // jsdom does not implement ResizeObserver; the heap-arrow overlay (Task 15)
 // uses it to redraw on layout changes, so stub it for all component tests.
