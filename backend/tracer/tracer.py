@@ -9,7 +9,12 @@ IGNORED_NAMES = {
 }
 
 
-class MaxStepsExceeded(Exception):
+class MaxStepsExceeded(BaseException):
+    # Deliberately inherits from BaseException, not Exception: user code
+    # that does `except Exception:` (or a bare `except:` on Exception-like
+    # patterns) must NOT be able to swallow the step-limit signal and
+    # silently continue looping untraced once sys.settrace has already
+    # been disabled by that point.
     pass
 
 
@@ -54,6 +59,14 @@ class Tracer:
                         "possible infinite loop."
                     )
                 except Exception as e:
+                    self.error = f"{type(e).__name__}: {e}"
+                except BaseException as e:
+                    # Catches SystemExit, KeyboardInterrupt, and any other
+                    # BaseException the user's code raises (e.g. sys.exit()),
+                    # none of which are Exception subclasses. Without this,
+                    # such an exception would escape run() entirely, and in
+                    # the subprocess runner that means the child process dies
+                    # without ever posting a result to the queue.
                     self.error = f"{type(e).__name__}: {e}"
             finally:
                 sys.settrace(old_trace)

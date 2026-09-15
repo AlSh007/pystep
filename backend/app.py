@@ -4,7 +4,9 @@ from flask_cors import CORS
 from tracer.runner import run_code
 
 app = Flask(__name__)
-CORS(app)  # local dev tool only — open CORS is fine, no auth/session data involved
+CORS(app, origins=["http://localhost:5173"])  # local dev tool only — /api/trace
+# executes arbitrary Python, so CORS is scoped to just the frontend's dev
+# server origin rather than left wide open to any origin.
 
 
 @app.get("/api/health")

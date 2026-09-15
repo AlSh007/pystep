@@ -92,3 +92,60 @@ def test_non_syntax_error_compile_failure_is_caught_and_restores_stdout():
     assert steps == []
     assert tracer.error is not None
     assert sys.stdout is real_stdout
+
+
+def test_importing_a_stdlib_module_does_not_hang_or_blow_up_the_trace():
+    # Regression test: `random` (and any module) has a __dict__, so before
+    # the encoder special-cased modules, this line would recurse into the
+    # entire module namespace on every step, effectively hanging the tracer.
+    import time
+
+    code = "import random\nx = random.randint(1, 10)\n"
+    tracer = Tracer(max_steps=1000)
+
+    start = time.time()
+    steps = tracer.run(code)
+    elapsed = time.time() - start
+
+    assert elapsed < 5, f"tracer took {elapsed}s, likely hung expanding the module"
+    assert tracer.error is None
+    assert len(steps) > 0
+    last_locals = steps[-1]["stack"][0]["locals"]
+    assert isinstance(last_locals["x"], int)
+    # The module reference itself must be a short string, not expanded.
+    assert isinstance(last_locals["random"], str)
+    assert last_locals["random"].startswith("<module")
+
+
+def test_max_steps_exceeded_cannot_be_swallowed_by_users_except_exception():
+    # Regression test: MaxStepsExceeded must inherit from BaseException (not
+    # Exception) so a user's own `except Exception: pass` inside their loop
+    # can't catch it and silently continue running untraced (since
+    # sys.settrace has already been torn down by the time the exception
+    # would otherwise propagate past the loop).
+    code = (
+        "i = 0\n"
+        "while True:\n"
+        "    try:\n"
+        "        i += 1\n"
+        "    except Exception:\n"
+        "        pass\n"
+    )
+    tracer = Tracer(max_steps=50)
+    steps = tracer.run(code)
+
+    assert tracer.error is not None
+    assert "step limit" in tracer.error
+    assert len(steps) <= 51
+
+
+def test_system_exit_in_user_code_is_caught_and_reported_not_raised():
+    # Regression test: SystemExit (raised by sys.exit()) is a BaseException,
+    # not an Exception subclass, so it used to escape Tracer.run() entirely
+    # instead of being recorded as tracer.error.
+    tracer = Tracer()
+    steps = tracer.run("x = 1\nimport sys\nsys.exit(0)\n")
+
+    assert tracer.error is not None
+    assert "SystemExit" in tracer.error
+    assert len(steps) > 0

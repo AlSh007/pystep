@@ -9,8 +9,18 @@ DEFAULT_TIMEOUT_SECONDS = 5.0
 
 def _run_in_subprocess(code: str, max_steps: int, result_queue) -> None:
     tracer = Tracer(max_steps=max_steps)
-    steps = tracer.run(code)
-    result_queue.put({"steps": steps, "error": tracer.error})
+    try:
+        steps = tracer.run(code)
+        result_queue.put({"steps": steps, "error": tracer.error})
+    except BaseException as e:
+        # Defense in depth: Tracer.run() itself now catches BaseException
+        # internally, so this should not normally trigger. But if anything
+        # else in this subprocess ever raises (e.g. a bug in ValueEncoder,
+        # or a future code path that bypasses Tracer.run()'s own handling),
+        # we must still always put *something* on the queue — otherwise the
+        # parent waits out the full timeout and reports a misleading
+        # "Execution timed out" instead of the real cause.
+        result_queue.put({"steps": [], "error": f"{type(e).__name__}: {e}"})
 
 
 def run_code(

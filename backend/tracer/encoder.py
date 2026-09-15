@@ -1,3 +1,6 @@
+import math
+import types
+
 PRIMITIVE_TYPES = (type(None), bool, int, float, str)
 
 
@@ -23,6 +26,13 @@ class ValueEncoder:
     def encode(self, value, path_ids=None):
         if path_ids is None:
             path_ids = set()
+
+        if isinstance(value, float) and not math.isfinite(value):
+            # inf/-inf/nan are valid Python floats but are NOT valid JSON
+            # (json.dumps emits the bare, non-standard tokens Infinity/NaN,
+            # which browsers' response.json() cannot parse). Represent them
+            # as their repr string ("inf", "-inf", "nan") instead.
+            return repr(value)
 
         if isinstance(value, PRIMITIVE_TYPES):
             return value
@@ -53,6 +63,13 @@ class ValueEncoder:
 
         if callable(value) and hasattr(value, "__name__"):
             return ["FUNCTION", value.__name__, self._small_id(value)]
+
+        if isinstance(value, types.ModuleType):
+            # A module's __dict__ is its entire namespace (potentially huge,
+            # e.g. the `random` or `math` stdlib modules), so recursing into
+            # it like a generic instance would blow up encode time/size.
+            # Represent it as a short opaque string instead.
+            return f"<module '{value.__name__}'>"
 
         if hasattr(value, "__dict__"):
             class_name = type(value).__name__

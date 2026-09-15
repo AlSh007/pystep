@@ -1,3 +1,6 @@
+import json
+import types
+
 from tracer.encoder import ValueEncoder
 
 
@@ -82,3 +85,59 @@ def test_instance_encoding():
     assert isinstance(result[2], int)
     attrs = dict(result[3:])
     assert attrs == {"x": 1, "y": 2}
+
+
+def test_module_is_encoded_as_a_short_string_not_expanded():
+    enc = ValueEncoder()
+    result = enc.encode(json)
+    assert isinstance(result, str)
+    assert result.startswith("<module")
+    # Sanity check it isn't secretly a giant compound array in string form.
+    assert len(result) < 100
+
+
+def test_module_encoding_is_json_serializable_and_short():
+    enc = ValueEncoder()
+    result = enc.encode(types)
+    encoded_json = json.dumps(result)
+    assert len(encoded_json) < 100
+
+
+def test_positive_infinity_encodes_as_inf_string():
+    enc = ValueEncoder()
+    result = enc.encode(float("inf"))
+    assert result == "inf"
+
+
+def test_negative_infinity_encodes_as_negative_inf_string():
+    enc = ValueEncoder()
+    result = enc.encode(float("-inf"))
+    assert result == "-inf"
+
+
+def test_nan_encodes_as_nan_string():
+    enc = ValueEncoder()
+    result = enc.encode(float("nan"))
+    assert result == "nan"
+
+
+def test_finite_float_still_passes_through_unchanged():
+    enc = ValueEncoder()
+    result = enc.encode(3.14)
+    assert result == 3.14
+    assert isinstance(result, float)
+
+
+def test_non_finite_float_results_are_valid_json_strings():
+    enc = ValueEncoder()
+    for value, expected in (
+        (float("inf"), "inf"),
+        (float("-inf"), "-inf"),
+        (float("nan"), "nan"),
+    ):
+        result = enc.encode(value)
+        dumped = json.dumps(result)
+        assert dumped == f'"{expected}"'
+        # json.loads should hand back the plain string, not attempt to
+        # reconstruct a non-finite float from bare Infinity/NaN tokens.
+        assert json.loads(dumped) == expected
