@@ -1,0 +1,703 @@
+{
+  "steps": [
+    {
+      "line": 0,
+      "event": "call",
+      "stack": [
+        {
+          "funcName": "<module>",
+          "locals": {}
+        }
+      ],
+      "stdout": ""
+    },
+    {
+      "line": 1,
+      "event": "line",
+      "stack": [
+        {
+          "funcName": "<module>",
+          "locals": {}
+        }
+      ],
+      "stdout": ""
+    },
+    {
+      "line": 1,
+      "event": "call",
+      "stack": [
+        {
+          "funcName": "<module>",
+          "locals": {}
+        },
+        {
+          "funcName": "Node",
+          "locals": {}
+        }
+      ],
+      "stdout": ""
+    },
+    {
+      "line": 1,
+      "event": "line",
+      "stack": [
+        {
+          "funcName": "<module>",
+          "locals": {}
+        },
+        {
+          "funcName": "Node",
+          "locals": {}
+        }
+      ],
+      "stdout": ""
+    },
+    {
+      "line": 2,
+      "event": "line",
+      "stack": [
+        {
+          "funcName": "<module>",
+          "locals": {}
+        },
+        {
+          "funcName": "Node",
+          "locals": {
+            "__module__": "__main__",
+            "__qualname__": "Node"
+          }
+        }
+      ],
+      "stdout": ""
+    },
+    {
+      "line": 2,
+      "event": "return",
+      "stack": [
+        {
+          "funcName": "<module>",
+          "locals": {}
+        },
+        {
+          "funcName": "Node",
+          "locals": {
+            "__module__": "__main__",
+            "__qualname__": "Node",
+            "__init__": [
+              "FUNCTION",
+              "__init__",
+              1
+            ]
+          }
+        }
+      ],
+      "stdout": ""
+    },
+    {
+      "line": 7,
+      "event": "line",
+      "stack": [
+        {
+          "funcName": "<module>",
+          "locals": {
+            "Node": [
+              "FUNCTION",
+              "Node",
+              2
+            ]
+          }
+        }
+      ],
+      "stdout": ""
+    },
+    {
+      "line": 11,
+      "event": "line",
+      "stack": [
+        {
+          "funcName": "<module>",
+          "locals": {
+            "Node": [
+              "FUNCTION",
+              "Node",
+              2
+            ],
+            "make_node": [
+              "FUNCTION",
+              "make_node",
+              3
+            ]
+          }
+        }
+      ],
+      "stdout": ""
+    },
+    {
+      "line": 12,
+      "event": "line",
+      "stack": [
+        {
+          "funcName": "<module>",
+          "locals": {
+            "Node": [
+              "FUNCTION",
+              "Node",
+              2
+            ],
+            "make_node": [
+              "FUNCTION",
+              "make_node",
+              3
+            ],
+            "items": [
+              "LIST",
+              4,
+              1,
+              2
+            ]
+          }
+        }
+      ],
+      "stdout": ""
+    },
+    {
+      "line": 13,
+      "event": "line",
+      "stack": [
+        {
+          "funcName": "<module>",
+          "locals": {
+            "Node": [
+              "FUNCTION",
+              "Node",
+              2
+            ],
+            "make_node": [
+              "FUNCTION",
+              "make_node",
+              3
+            ],
+            "items": [
+              "LIST",
+              4,
+              1,
+              2
+            ],
+            "mapping": [
+              "DICT",
+              5,
+              [
+                "a",
+                1
+              ],
+              [
+                "b",
+                2
+              ]
+            ]
+          }
+        }
+      ],
+      "stdout": ""
+    },
+    {
+      "line": 7,
+      "event": "call",
+      "stack": [
+        {
+          "funcName": "<module>",
+          "locals": {
+            "Node": [
+              "FUNCTION",
+              "Node",
+              2
+            ],
+            "make_node": [
+              "FUNCTION",
+              "make_node",
+              3
+            ],
+            "items": [
+              "LIST",
+              4,
+              1,
+              2
+            ],
+            "mapping": [
+              "DICT",
+              5,
+              [
+                "a",
+                1
+              ],
+              [
+                "b",
+                2
+              ]
+            ]
+          }
+        },
+        {
+          "funcName": "make_node",
+          "locals": {
+            "v": 5
+          }
+        }
+      ],
+      "stdout": ""
+    },
+    {
+      "line": 8,
+      "event": "line",
+      "stack": [
+        {
+          "funcName": "<module>",
+          "locals": {
+            "Node": [
+              "FUNCTION",
+              "Node",
+              2
+            ],
+            "make_node": [
+              "FUNCTION",
+              "make_node",
+              3
+            ],
+            "items": [
+              "LIST",
+              4,
+              1,
+              2
+            ],
+            "mapping": [
+              "DICT",
+              5,
+              [
+                "a",
+                1
+              ],
+              [
+                "b",
+                2
+              ]
+            ]
+          }
+        },
+        {
+          "funcName": "make_node",
+          "locals": {
+            "v": 5
+          }
+        }
+      ],
+      "stdout": ""
+    },
+    {
+      "line": 2,
+      "event": "call",
+      "stack": [
+        {
+          "funcName": "<module>",
+          "locals": {
+            "Node": [
+              "FUNCTION",
+              "Node",
+              2
+            ],
+            "make_node": [
+              "FUNCTION",
+              "make_node",
+              3
+            ],
+            "items": [
+              "LIST",
+              4,
+              1,
+              2
+            ],
+            "mapping": [
+              "DICT",
+              5,
+              [
+                "a",
+                1
+              ],
+              [
+                "b",
+                2
+              ]
+            ]
+          }
+        },
+        {
+          "funcName": "make_node",
+          "locals": {
+            "v": 5
+          }
+        },
+        {
+          "funcName": "__init__",
+          "locals": {
+            "self": [
+              "INSTANCE",
+              "Node",
+              6
+            ],
+            "value": 5
+          }
+        }
+      ],
+      "stdout": ""
+    },
+    {
+      "line": 3,
+      "event": "line",
+      "stack": [
+        {
+          "funcName": "<module>",
+          "locals": {
+            "Node": [
+              "FUNCTION",
+              "Node",
+              2
+            ],
+            "make_node": [
+              "FUNCTION",
+              "make_node",
+              3
+            ],
+            "items": [
+              "LIST",
+              4,
+              1,
+              2
+            ],
+            "mapping": [
+              "DICT",
+              5,
+              [
+                "a",
+                1
+              ],
+              [
+                "b",
+                2
+              ]
+            ]
+          }
+        },
+        {
+          "funcName": "make_node",
+          "locals": {
+            "v": 5
+          }
+        },
+        {
+          "funcName": "__init__",
+          "locals": {
+            "self": [
+              "INSTANCE",
+              "Node",
+              6
+            ],
+            "value": 5
+          }
+        }
+      ],
+      "stdout": ""
+    },
+    {
+      "line": 4,
+      "event": "line",
+      "stack": [
+        {
+          "funcName": "<module>",
+          "locals": {
+            "Node": [
+              "FUNCTION",
+              "Node",
+              2
+            ],
+            "make_node": [
+              "FUNCTION",
+              "make_node",
+              3
+            ],
+            "items": [
+              "LIST",
+              4,
+              1,
+              2
+            ],
+            "mapping": [
+              "DICT",
+              5,
+              [
+                "a",
+                1
+              ],
+              [
+                "b",
+                2
+              ]
+            ]
+          }
+        },
+        {
+          "funcName": "make_node",
+          "locals": {
+            "v": 5
+          }
+        },
+        {
+          "funcName": "__init__",
+          "locals": {
+            "self": [
+              "INSTANCE",
+              "Node",
+              6,
+              [
+                "value",
+                5
+              ]
+            ],
+            "value": 5
+          }
+        }
+      ],
+      "stdout": ""
+    },
+    {
+      "line": 4,
+      "event": "return",
+      "stack": [
+        {
+          "funcName": "<module>",
+          "locals": {
+            "Node": [
+              "FUNCTION",
+              "Node",
+              2
+            ],
+            "make_node": [
+              "FUNCTION",
+              "make_node",
+              3
+            ],
+            "items": [
+              "LIST",
+              4,
+              1,
+              2
+            ],
+            "mapping": [
+              "DICT",
+              5,
+              [
+                "a",
+                1
+              ],
+              [
+                "b",
+                2
+              ]
+            ]
+          }
+        },
+        {
+          "funcName": "make_node",
+          "locals": {
+            "v": 5
+          }
+        },
+        {
+          "funcName": "__init__",
+          "locals": {
+            "self": [
+              "INSTANCE",
+              "Node",
+              6,
+              [
+                "value",
+                5
+              ],
+              [
+                "self_ref",
+                [
+                  "CIRCULAR_REF",
+                  6
+                ]
+              ]
+            ],
+            "value": 5
+          }
+        }
+      ],
+      "stdout": ""
+    },
+    {
+      "line": 8,
+      "event": "return",
+      "stack": [
+        {
+          "funcName": "<module>",
+          "locals": {
+            "Node": [
+              "FUNCTION",
+              "Node",
+              2
+            ],
+            "make_node": [
+              "FUNCTION",
+              "make_node",
+              3
+            ],
+            "items": [
+              "LIST",
+              4,
+              1,
+              2
+            ],
+            "mapping": [
+              "DICT",
+              5,
+              [
+                "a",
+                1
+              ],
+              [
+                "b",
+                2
+              ]
+            ]
+          }
+        },
+        {
+          "funcName": "make_node",
+          "locals": {
+            "v": 5
+          }
+        }
+      ],
+      "stdout": ""
+    },
+    {
+      "line": 14,
+      "event": "line",
+      "stack": [
+        {
+          "funcName": "<module>",
+          "locals": {
+            "Node": [
+              "FUNCTION",
+              "Node",
+              2
+            ],
+            "make_node": [
+              "FUNCTION",
+              "make_node",
+              3
+            ],
+            "items": [
+              "LIST",
+              4,
+              1,
+              2
+            ],
+            "mapping": [
+              "DICT",
+              5,
+              [
+                "a",
+                1
+              ],
+              [
+                "b",
+                2
+              ]
+            ],
+            "n": [
+              "INSTANCE",
+              "Node",
+              6,
+              [
+                "value",
+                5
+              ],
+              [
+                "self_ref",
+                [
+                  "CIRCULAR_REF",
+                  6
+                ]
+              ]
+            ]
+          }
+        }
+      ],
+      "stdout": ""
+    },
+    {
+      "line": 14,
+      "event": "return",
+      "stack": [
+        {
+          "funcName": "<module>",
+          "locals": {
+            "Node": [
+              "FUNCTION",
+              "Node",
+              2
+            ],
+            "make_node": [
+              "FUNCTION",
+              "make_node",
+              3
+            ],
+            "items": [
+              "LIST",
+              4,
+              1,
+              2
+            ],
+            "mapping": [
+              "DICT",
+              5,
+              [
+                "a",
+                1
+              ],
+              [
+                "b",
+                2
+              ]
+            ],
+            "n": [
+              "INSTANCE",
+              "Node",
+              6,
+              [
+                "value",
+                5
+              ],
+              [
+                "self_ref",
+                [
+                  "CIRCULAR_REF",
+                  6
+                ]
+              ]
+            ],
+            "f": [
+              "FUNCTION",
+              "make_node",
+              3
+            ]
+          }
+        }
+      ],
+      "stdout": ""
+    }
+  ],
+  "error": null
+}

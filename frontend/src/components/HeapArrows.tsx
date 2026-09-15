@@ -48,7 +48,16 @@ export function HeapArrows({ containerRef, redrawKey }: HeapArrowsProps) {
     recompute()
     const observer = new ResizeObserver(recompute)
     observer.observe(container)
-    return () => observer.disconnect()
+    // .layout__stack and .layout__heap (the scrollable panels inside this
+    // container) both have overflow: auto, and scroll events don't bubble.
+    // A capturing-phase listener on the container still receives scroll
+    // events fired on any descendant scrollable element, so this catches
+    // scrolling in either panel without needing to know their selectors.
+    container.addEventListener("scroll", recompute, { capture: true, passive: true })
+    return () => {
+      observer.disconnect()
+      container.removeEventListener("scroll", recompute, { capture: true })
+    }
   }, [containerRef, redrawKey])
 
   return (

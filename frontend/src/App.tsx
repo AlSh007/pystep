@@ -1,4 +1,4 @@
-import { useRef } from "react"
+import { useMemo, useRef } from "react"
 import { TraceProvider, useTrace } from "./state/traceStore"
 import { EditorPanel } from "./components/EditorPanel"
 import { TransportControls } from "./components/TransportControls"
@@ -13,7 +13,7 @@ function Visualizer() {
   const { state } = useTrace()
   const rightPaneRef = useRef<HTMLDivElement>(null)
   const currentStep = state.steps[state.currentStepIndex]
-  const heap = currentStep ? collectHeap(currentStep) : new Map()
+  const heap = useMemo(() => (currentStep ? collectHeap(currentStep) : new Map()), [currentStep])
 
   return (
     <div className="layout">
@@ -29,7 +29,10 @@ function Visualizer() {
         <section className="layout__heap" data-testid="layout-heap" key={`heap-${state.currentStepIndex}`}>
           <HeapPanel heap={heap} />
         </section>
-        <HeapArrows containerRef={rightPaneRef} redrawKey={state.currentStepIndex} />
+        <HeapArrows
+          containerRef={rightPaneRef}
+          redrawKey={`${state.steps.length}-${state.currentStepIndex}`}
+        />
       </div>
     </div>
   )

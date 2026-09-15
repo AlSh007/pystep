@@ -10,7 +10,16 @@ export async function traceCode(code: string): Promise<TraceResult> {
   })
 
   if (!response.ok) {
-    throw new Error(`Trace request failed: ${response.status}`)
+    let message = `Trace request failed: ${response.status}`
+    try {
+      const body = await response.json()
+      if (body && typeof body.error === "string") {
+        message = body.error
+      }
+    } catch {
+      // response body wasn't JSON or didn't parse — keep the generic message
+    }
+    throw new Error(message)
   }
 
   return (await response.json()) as TraceResult

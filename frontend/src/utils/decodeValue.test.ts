@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest"
 import { toRenderValue, collectHeap } from "./decodeValue"
-import type { Step } from "../types/trace"
+import type { Step, TraceResult } from "../types/trace"
+import realBackendTrace from "./__fixtures__/realBackendTrace.json"
 
 describe("toRenderValue", () => {
   it("renders None/True/False/numbers/strings as primitives", () => {
@@ -106,5 +107,100 @@ describe("collectHeap", () => {
       label: "function factorial",
       items: [],
     })
+  })
+})
+
+// This fixture is REAL JSON captured directly from `run_code` in
+// backend/tracer/runner.py (not a hand-written TypeScript fixture), by
+// running the following source through the actual backend encoder:
+//
+//   class Node:
+//       def __init__(self, value):
+//           self.value = value
+//           self.self_ref = self
+//
+//   def make_node(v):
+//       return Node(v)
+//
+//   items = [1, 2]
+//   mapping = {"a": 1, "b": 2}
+//   n = make_node(5)
+//   f = make_node
+//
+// Two of the most serious bugs in this project (INSTANCE/FUNCTION
+// id-index confusion, and FUNCTION being excluded from the heap map)
+// lived exactly in this backend<->frontend seam, and hand-written
+// fixtures didn't catch them. This locks in the real wire shape.
+describe("collectHeap against a real backend trace fixture", () => {
+  const trace = realBackendTrace as unknown as TraceResult
+
+  it("has no error and at least one step", () => {
+    expect(trace.error).toBeNull()
+    expect(trace.steps.length).toBeGreaterThan(0)
+  })
+
+  it("never throws while collecting the heap for any step", () => {
+    for (const step of trace.steps) {
+      expect(() => collectHeap(step)).not.toThrow()
+    }
+  })
+
+  it("the final step's heap contains the list, dict, instance, and function with correct kind/label", () => {
+    const finalStep = trace.steps[trace.steps.length - 1]
+    const heap = collectHeap(finalStep)
+
+    const byLabel = (label: string) => Array.from(heap.values()).find((o) => o.label === label)
+
+    const list = byLabel("list")
+    expect(list).toBeDefined()
+    expect(list?.kind).toBe("LIST")
+    expect(list?.items.map((i) => i.value)).toEqual([
+      { kind: "primitive", display: "1" },
+      { kind: "primitive", display: "2" },
+    ])
+
+    const dict = byLabel("dict")
+    expect(dict).toBeDefined()
+    expect(dict?.kind).toBe("DICT")
+    expect(dict?.items).toEqual([
+      { key: '"a"', value: { kind: "primitive", display: "1" } },
+      { key: '"b"', value: { kind: "primitive", display: "2" } },
+    ])
+
+    const instance = byLabel("Node")
+    expect(instance).toBeDefined()
+    expect(instance?.kind).toBe("INSTANCE")
+    const instanceAttrKeys = instance?.items.map((i) => i.key)
+    expect(instanceAttrKeys).toEqual(["value", "self_ref"])
+  })
+
+  it("resolves the `f = make_node` reference to a FUNCTION heap entry (locks in the id-index fix)", () => {
+    const finalStep = trace.steps[trace.steps.length - 1]
+    const heap = collectHeap(finalStep)
+    const locals = finalStep.stack[0].locals
+
+    const fRenderValue = toRenderValue(locals.f)
+    expect(fRenderValue.kind).toBe("ref")
+    if (fRenderValue.kind !== "ref") throw new Error("expected a ref")
+
+    const fHeapObject = heap.get(fRenderValue.id)
+    expect(fHeapObject).toBeDefined()
+    expect(fHeapObject?.kind).toBe("FUNCTION")
+    expect(fHeapObject?.label).toBe("function make_node")
+
+    // `f` is a plain alias of `make_node` (same underlying function object),
+    // so they must resolve to the very same heap id, not two separate ones.
+    const makeNodeRenderValue = toRenderValue(locals.make_node)
+    expect(makeNodeRenderValue).toEqual(fRenderValue)
+  })
+
+  it("the self-referential instance does not cause infinite recursion, and the heap has the exact expected size", () => {
+    const finalStep = trace.steps[trace.steps.length - 1]
+    const heap = collectHeap(finalStep)
+
+    // Node (class, itself callable -> FUNCTION), make_node (function),
+    // items (list), mapping (dict), n (instance) = 5 distinct heap
+    // objects. `f` aliases make_node's id, so it adds no new entry.
+    expect(heap.size).toBe(5)
   })
 })
