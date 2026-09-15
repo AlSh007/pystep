@@ -1,0 +1,41 @@
+:root {
+  --bg: #1e1e1e;
+  --bg-panel: #252526;
+  --fg: #d4d4d4;
+  --border: #3c3c3c;
+  --accent: #4fc1ff;
+  --font-mono: "SF Mono", "Fira Code", Consolas, monospace;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--fg);
+  font-family: var(--font-mono);
+}
+
+.layout {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  height: 100vh;
+  padding: 1rem;
+  box-sizing: border-box;
+}
+
+.layout__right {
+  display: grid;
+  grid-template-rows: 1fr 1fr;
+  gap: 1rem;
+  position: relative;
+}
+
+.layout__editor,
+.layout__stack,
+.layout__heap {
+  background: var(--bg-panel);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 0.75rem;
+  overflow: auto;
+}
