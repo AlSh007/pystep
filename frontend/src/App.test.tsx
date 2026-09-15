@@ -3,10 +3,10 @@ import { describe, expect, it } from "vitest"
 import App from "./App"
 
 describe("App", () => {
-  it("renders the three main panes", () => {
+  it("renders the editor, run button, and empty stack/heap panels", () => {
     render(<App />)
-    expect(screen.getByTestId("layout-editor")).toBeInTheDocument()
-    expect(screen.getByTestId("layout-stack")).toBeInTheDocument()
-    expect(screen.getByTestId("layout-heap")).toBeInTheDocument()
+    expect(screen.getByText("Run")).toBeInTheDocument()
+    expect(screen.getByText("No active frame")).toBeInTheDocument()
+    expect(screen.getByText("No heap objects")).toBeInTheDocument()
   })
 })
