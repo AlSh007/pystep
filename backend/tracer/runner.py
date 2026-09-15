@@ -1,4 +1,5 @@
 import multiprocessing
+from queue import Empty
 
 from tracer.tracer import Tracer
 
@@ -30,17 +31,27 @@ def run_code(
         target=_run_in_subprocess, args=(code, max_steps, result_queue)
     )
     process.start()
-    process.join(timeout_seconds)
 
-    if process.is_alive():
-        process.terminate()
+    # We must drain the queue *before* joining the process. multiprocessing.Queue.put()
+    # in the child hands data to a background feeder thread that writes into an OS
+    # pipe; if the payload is larger than the OS pipe buffer and nobody is reading yet,
+    # that feeder thread blocks and the child never actually exits. Joining first (with
+    # a timeout) would then see is_alive() == True for a process that already finished
+    # its computation, and we'd terminate() it and discard a valid result. Reading with
+    # a timeout first blocks until either data arrives or the timeout elapses, which
+    # avoids that race.
+    try:
+        result = result_queue.get(timeout=timeout_seconds)
+    except Empty:
+        if process.is_alive():
+            process.terminate()
+            process.join()
+            return {
+                "steps": [],
+                "error": f"Execution timed out after {timeout_seconds}s (possible infinite loop).",
+            }
         process.join()
-        return {
-            "steps": [],
-            "error": f"Execution timed out after {timeout_seconds}s (possible infinite loop).",
-        }
+        return {"steps": [], "error": "Execution failed unexpectedly (no result produced)."}
 
-    if not result_queue.empty():
-        return result_queue.get()
-
-    return {"steps": [], "error": "Execution failed unexpectedly (no result produced)."}
+    process.join()
+    return result
