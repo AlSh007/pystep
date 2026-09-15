@@ -80,3 +80,15 @@ def test_step_limit_stops_an_infinite_loop():
 
     assert "step limit" in tracer.error
     assert len(steps) <= 51
+
+
+def test_non_syntax_error_compile_failure_is_caught_and_restores_stdout():
+    import sys
+
+    real_stdout = sys.stdout
+    tracer = Tracer()
+    steps = tracer.run("1" + "+1" * 200000)  # triggers RecursionError during compile
+
+    assert steps == []
+    assert tracer.error is not None
+    assert sys.stdout is real_stdout

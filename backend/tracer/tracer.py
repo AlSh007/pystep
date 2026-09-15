@@ -32,29 +32,32 @@ class Tracer:
     def run(self, code: str) -> list[dict]:
         real_stdout = sys.stdout
         sys.stdout = self._stdout_capture
-
         try:
-            compiled = compile(code, "<user_code>", "exec")
-        except SyntaxError as e:
-            self.error = f"SyntaxError: {e.msg} (line {e.lineno})"
-            sys.stdout = real_stdout
-            return self.steps
-
-        old_trace = sys.gettrace()
-        user_globals = {"__name__": "__main__"}
-        try:
-            sys.settrace(self._trace_calls)
             try:
-                exec(compiled, user_globals)
-            except MaxStepsExceeded:
-                self.error = (
-                    f"Exceeded max step limit ({self.max_steps}); "
-                    "possible infinite loop."
-                )
+                compiled = compile(code, "<user_code>", "exec")
+            except SyntaxError as e:
+                self.error = f"SyntaxError: {e.msg} (line {e.lineno})"
+                return self.steps
             except Exception as e:
                 self.error = f"{type(e).__name__}: {e}"
+                return self.steps
+
+            old_trace = sys.gettrace()
+            user_globals = {"__name__": "__main__"}
+            try:
+                sys.settrace(self._trace_calls)
+                try:
+                    exec(compiled, user_globals)
+                except MaxStepsExceeded:
+                    self.error = (
+                        f"Exceeded max step limit ({self.max_steps}); "
+                        "possible infinite loop."
+                    )
+                except Exception as e:
+                    self.error = f"{type(e).__name__}: {e}"
+            finally:
+                sys.settrace(old_trace)
         finally:
-            sys.settrace(old_trace)
             sys.stdout = real_stdout
 
         return self.steps
