@@ -43,9 +43,13 @@ export function CodeEditor({ code, onChange, currentLine }: CodeEditorProps) {
     setView(createdView)
   }, [])
 
+  // currentLine can go back to null (e.g. RUN_START/RUN_ERROR reset it), and
+  // that must still clear any stale highlight left over from a previous run.
+  // Passing 0 in that case relies on currentLineField's existing guard
+  // (lineNumber <= 0 => Decoration.none) to clear the decoration.
   useEffect(() => {
-    if (view && currentLine !== null) {
-      view.dispatch({ effects: setCurrentLine.of(currentLine) })
+    if (view) {
+      view.dispatch({ effects: setCurrentLine.of(currentLine ?? 0) })
     }
   }, [view, currentLine])
 
