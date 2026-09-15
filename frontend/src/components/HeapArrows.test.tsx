@@ -78,6 +78,58 @@ describe("HeapArrows", () => {
     expect(updatedLines[0].getAttribute("y1")).toBe("205")
   })
 
+  it("highlights a variable and its heap target when clicked, and clears on a second click", () => {
+    vi.spyOn(HTMLElement.prototype, "getBoundingClientRect").mockImplementation(function (
+      this: HTMLElement,
+    ) {
+      if (this.dataset.refSource) {
+        return { top: 10, left: 10, right: 30, bottom: 20, width: 20, height: 10 } as DOMRect
+      }
+      if (this.dataset.heapTarget) {
+        return { top: 50, left: 100, right: 150, bottom: 70, width: 50, height: 20 } as DOMRect
+      }
+      return { top: 0, left: 0, right: 0, bottom: 0, width: 0, height: 0 } as DOMRect
+    })
+
+    const { container, getByText } = render(<Harness />)
+    const source = getByText("ref")
+    const target = getByText("box")
+    const line = () => container.querySelector("line")
+
+    fireEvent.click(source)
+    expect(source).toHaveClass("is-selected")
+    expect(target).toHaveClass("is-selected")
+    expect(line()).toHaveClass("heap-arrow-line--selected")
+
+    fireEvent.click(source)
+    expect(source).not.toHaveClass("is-selected")
+    expect(target).not.toHaveClass("is-selected")
+    expect(line()).not.toHaveClass("heap-arrow-line--selected")
+  })
+
+  it("clears the selection when clicking elsewhere in the container", () => {
+    vi.spyOn(HTMLElement.prototype, "getBoundingClientRect").mockImplementation(function (
+      this: HTMLElement,
+    ) {
+      if (this.dataset.refSource) {
+        return { top: 10, left: 10, right: 30, bottom: 20, width: 20, height: 10 } as DOMRect
+      }
+      if (this.dataset.heapTarget) {
+        return { top: 50, left: 100, right: 150, bottom: 70, width: 50, height: 20 } as DOMRect
+      }
+      return { top: 0, left: 0, right: 0, bottom: 0, width: 0, height: 0 } as DOMRect
+    })
+
+    const { container, getByText } = render(<Harness />)
+    const source = getByText("ref")
+
+    fireEvent.click(source)
+    expect(source).toHaveClass("is-selected")
+
+    fireEvent.click(container.firstChild as Element)
+    expect(source).not.toHaveClass("is-selected")
+  })
+
   it("draws each line with an arrowhead pointing at the target", () => {
     vi.spyOn(HTMLElement.prototype, "getBoundingClientRect").mockImplementation(function (
       this: HTMLElement,

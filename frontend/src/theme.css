@@ -4,6 +4,7 @@
   --fg: #d4d4d4;
   --border: #3c3c3c;
   --accent: #4fc1ff;
+  --selected: #ffb454;
   --font-mono: "SF Mono", "Fira Code", Consolas, monospace;
 }
 
@@ -156,6 +157,32 @@ body {
 
 .heap-arrow-head {
   fill: var(--accent);
+}
+
+.heap-arrow-line--selected {
+  stroke: var(--selected);
+  stroke-width: 2.5;
+}
+
+.heap-arrow-head--selected {
+  fill: var(--selected);
+}
+
+.value-cell--ref,
+.heap-box__header {
+  cursor: pointer;
+}
+
+.value-cell--ref:hover,
+.heap-box__header:hover {
+  text-decoration: underline;
+}
+
+.is-selected {
+  outline: 2px solid var(--selected);
+  outline-offset: 1px;
+  border-radius: 3px;
+  background: rgba(255, 180, 84, 0.12);
 }
 
 @keyframes fadeIn {
