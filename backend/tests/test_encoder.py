@@ -87,6 +87,28 @@ def test_instance_encoding():
     assert attrs == {"x": 1, "y": 2}
 
 
+def test_class_object_is_encoded_distinctly_from_a_function():
+    class Dog:
+        def __init__(self, name):
+            self.name = name
+
+    enc = ValueEncoder()
+    result = enc.encode(Dog)
+    assert result[0] == "CLASS"
+    assert result[1] == "Dog"
+    assert isinstance(result[2], int)
+
+
+def test_class_and_its_instance_get_different_small_ids():
+    class Dog:
+        pass
+
+    enc = ValueEncoder()
+    class_result = enc.encode(Dog)
+    instance_result = enc.encode(Dog())
+    assert class_result[2] != instance_result[2]
+
+
 def test_module_is_encoded_as_a_short_string_not_expanded():
     enc = ValueEncoder()
     result = enc.encode(json)

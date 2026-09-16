@@ -33,7 +33,7 @@ export interface HeapItem {
 
 export interface HeapObject {
   id: number
-  kind: "LIST" | "TUPLE" | "SET" | "DICT" | "INSTANCE" | "FUNCTION" | "OTHER"
+  kind: "LIST" | "TUPLE" | "SET" | "DICT" | "INSTANCE" | "FUNCTION" | "CLASS" | "OTHER"
   label: string
   items: HeapItem[]
 }

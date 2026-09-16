@@ -13,15 +13,17 @@ function formatPrimitive(value: null | boolean | number | string): string {
 }
 
 // The backend encoder (backend/tracer/encoder.py) puts the numeric small-id
-// at index 1 for most compound tags (["LIST", id, ...items]), but INSTANCE
-// and FUNCTION carry an extra string field (className / name) before the id:
+// at index 1 for most compound tags (["LIST", id, ...items]), but INSTANCE,
+// FUNCTION, and CLASS carry an extra string field (className / name) before
+// the id:
 //   ["INSTANCE", className, id, [attr, val], ...]
 //   ["FUNCTION", name, id]
+//   ["CLASS", name, id]
 // This helper centralizes that distinction so no call site has to assume
 // index 1 is always the id.
 function getCompoundId(value: EncodedCompound): number {
   const tag = value[0]
-  if (tag === "INSTANCE" || tag === "FUNCTION") {
+  if (tag === "INSTANCE" || tag === "FUNCTION" || tag === "CLASS") {
     return value[2] as number
   }
   return value[1] as number
@@ -71,6 +73,11 @@ function toHeapObject(value: EncodedCompound): HeapObject {
   if (tag === "FUNCTION") {
     const name = value[1] as string
     return { id, kind: "FUNCTION", label: `function ${name}`, items: [] }
+  }
+
+  if (tag === "CLASS") {
+    const name = value[1] as string
+    return { id, kind: "CLASS", label: `class ${name}`, items: [] }
   }
 
   const rest = value.slice(2)

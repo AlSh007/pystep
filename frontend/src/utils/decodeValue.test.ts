@@ -108,6 +108,25 @@ describe("collectHeap", () => {
       items: [],
     })
   })
+
+  it("adds a class reference to the heap map, distinct from a function", () => {
+    const step = stepWithLocals({ Dog: ["CLASS", "Dog", 1] })
+    const heap = collectHeap(step)
+
+    expect(heap.size).toBe(1)
+    expect(heap.get(1)).toEqual({
+      id: 1,
+      kind: "CLASS",
+      label: "class Dog",
+      items: [],
+    })
+  })
+})
+
+describe("toRenderValue for a class reference", () => {
+  it("renders a class reference with its numeric id", () => {
+    expect(toRenderValue(["CLASS", "Dog", 1])).toEqual({ kind: "ref", id: 1 })
+  })
 })
 
 // This fixture is REAL JSON captured directly from `run_code` in

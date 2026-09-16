@@ -61,6 +61,12 @@ class ValueEncoder:
                 for k, v in value.items()
             ]
 
+        if isinstance(value, type):
+            # A class is also callable and has __name__, so this must be
+            # checked before the generic FUNCTION branch below, or every
+            # class would be mislabeled as a function.
+            return ["CLASS", value.__name__, self._small_id(value)]
+
         if callable(value) and hasattr(value, "__name__"):
             return ["FUNCTION", value.__name__, self._small_id(value)]
 
