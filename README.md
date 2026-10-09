@@ -6,7 +6,7 @@ full design.
 
 ## Demo
 
-[![Demo](docs/demo/brag.jpg)](docs/demo/brag.mp4)
+https://github.com/user-attachments/assets/172e148a-6e6a-4bbe-9e18-f496b05c170e
 
 A ~21s walkthrough: run a snippet, step through it, follow references on the heap, and hit the step-limit safety net. (Click the poster to play the video. The video's UI is an illustrative recreation of the app, not a screen capture.)
 
