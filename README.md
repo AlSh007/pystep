@@ -4,6 +4,38 @@ A Python-only, step-by-step code execution visualizer. See
 `docs/superpowers/specs/2026-09-15-python-tutor-web-design.md` for the
 full design.
 
+## Demo
+
+[![Demo](docs/demo/brag.jpg)](docs/demo/brag.mp4)
+
+A ~21s walkthrough: run a snippet, step through it, follow references on the heap, and hit the step-limit safety net. (Click the poster to play the video. The video's UI is an illustrative recreation of the app, not a screen capture.)
+
+## Features
+
+- Write Python in a CodeMirror editor and hit Run.
+- Step forward/back, jump to first/last, play/pause, or scrub through the trace with a slider and a step counter.
+- The current line is highlighted; the stack panel shows frames and their variables.
+- The heap panel shows lists, dicts and objects, with arrows for references (including circular ones).
+- Errors (including the step limit and timeout below) show in an error banner.
+
+## How it works
+
+The frontend sends your code to the Flask backend (`POST /api/trace`), which runs it in a
+subprocess under a `sys.settrace`-based tracer and returns the full execution trace as JSON.
+Stepping and rendering then happen entirely client-side until you hit Run again.
+There is also a `GET /api/health` endpoint.
+
+## Tech stack
+
+- Backend: Python 3, Flask, flask-cors, pytest
+- Frontend: React 19, TypeScript, Vite, CodeMirror, Vitest, Oxlint
+
+## Project structure
+
+    backend/    Flask app (app.py) and tracer/ (tracer, encoder, subprocess runner) + tests
+    frontend/   React + Vite app (src/components, state, api, utils)
+    docs/       design spec, implementation plan, demo video
+
 ## Running locally
 
 Backend (in one terminal, first time only — creates the venv and installs dependencies):
@@ -29,7 +61,12 @@ Then (every time):
     cd frontend
     npm run dev
 
-Then open the URL Vite prints (typically http://localhost:5173).
+Then open the URL Vite prints (typically http://localhost:5173). The backend
+listens on port 5000 and only allows CORS from `http://localhost:5173`, so keep
+the frontend on that port.
+
+Other frontend scripts: `npm run build` (type-check and production build),
+`npm run lint`, `npm run preview`.
 
 ### Safety-limit constants
 
